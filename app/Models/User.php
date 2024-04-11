@@ -3,24 +3,25 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Althinect\FilamentSpatieRolesPermissions\Concerns\HasSuperAdmin;
+use App\Enums\UserStatus;
+use App\Enums\UserType;
+use Filament\Models\Contracts\HasName;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasName, HasMedia
 {
     use HasFactory, Notifiable;
+    use HasRoles;
+    use HasSuperAdmin;
+    use InteractsWithMedia;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $guarded = ['id'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -42,6 +43,13 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'type' => UserType::class,
+            'status' => UserStatus::class,
         ];
+    }
+
+    public function getFilamentName(): string
+    {
+        return $this->first_name . ' ' . $this->last_name;
     }
 }
